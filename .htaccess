@@ -1,0 +1,8 @@
+Options -Indexes
+
+# Protect uploads - no PHP execution
+<FilesMatch "\.php$">
+  <If "%{REQUEST_URI} =~ m|/uploads/|">
+    Require all denied
+  </If>
+</FilesMatch>
