@@ -616,3 +616,256 @@ $listings = $conn->query(
 
 <body>
 
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" onclick="switchPage('buyer/dashboard.php')">
+            🔨 Auction<span>Hub</span>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="menu">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link active" id="nav-dashboard" onclick="switchPage('buyer/dashboard.php')">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="nav-auctions" onclick="switchPage('buyer/auctions.php')">Auctions</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="nav-mybids" onclick="switchPage('buyer/my_bids.php')">My Bids</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="nav-watchlist" onclick="switchPage('buyer/watchlist.php')">Watchlist</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link btn-logout-nav" href="logout.php">
+                        <i class="bi bi-box-arrow-right me-1"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div id="page-dashboard" class="page-content active-page">
+    <section class="hero">
+        <div class="container">
+            <h1>Welcome to Online Auction System</h1>
+            <p>Bid Smart • Win Big • Buy Amazing Products</p>
+            <a onclick="switchPage('buyer/auctions.php')" class="hero-btn">
+                <i class="bi bi-gavel"></i> Explore Live Auctions
+            </a>
+            
+            <div class="row g-4 stats-grid justify-content-center">
+                <div class="col-6 col-md-3">
+                    <div class="stat-card">
+                        <h3>10K+</h3>
+                        <p>Active Bidders</p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-card">
+                        <h3>৳2M+</h3>
+                        <p>Total Volume</p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-card">
+                        <h3>99.8%</h3>
+                        <p>Secure Escrow</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div id="page-auctions" class="page-content">
+    <section class="auction-section">
+        <div class="container">
+            <div class="section-title-wrapper">
+                <h2 class="section-title">Active Live <span>Auctions</span></h2>
+            </div>
+            
+            <div class="row g-4">
+            <?php if($listings->num_rows > 0) { 
+                while($row = $listings->fetch_assoc()) { ?>
+                <div class="col-lg-4 col-md-6">
+                    <div class="auction-card">
+                        <div class="auction-image-container">
+                            <span class="badge-live"><span></span>Live</span>
+                            <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30" class="auction-image" alt="Product Image">
+                        </div>
+
+                        <div class="card-body">
+                            <h3 class="auction-title">
+                                <?php echo $row['title']; ?>
+                            </h3>
+
+                            <p class="auction-desc">
+                                <?php echo $row['description']; ?>
+                            </p>
+
+                            <div class="price-container">
+                                <span class="price-label">Current Bid</span>
+                                <div class="price">
+                                    ৳ <?php echo $row['current_bid']; ?>
+                                </div>
+                            </div>
+
+                            <form action="api/place_bid.php" method="POST">
+                                <input type="hidden" name="listing_id" value="<?php echo $row['id']; ?>">
+
+                                <div class="mb-3">
+                                    <input type="number" step="0.01" name="amount" class="form-control form-control-bid" placeholder="Enter Your Bid Amount" required>
+                                </div>
+
+                                <button type="submit" class="btn-bid">
+                                    <i class="bi bi-hammer"></i> Place Bid
+                                </button>
+                            </form>
+
+                            <button onclick="viewProductDetails('<?php echo addslashes($row['title']); ?>', '<?php echo addslashes($row['description']); ?>', '<?php echo $row['current_bid']; ?>')" class="btn-details-view">
+                                <i class="bi bi-eye"></i> View Full Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            <?php } 
+            } else { ?>
+                <div class="col-12 text-center">
+                    <div class="no-auctions-box">
+                        <div class="icon-pulse-wrapper">
+                            <i class="bi bi-shield-exclamation"></i>
+                        </div>
+                        <h4>No Live Auctions Available</h4>
+                        <p>Right now, there are no live bidding sessions running. Our team is curated with high-end luxury assets shortly. Check back soon or refresh below.</p>
+                        <a onclick="location.reload()" class="btn-refresh">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh Feed
+                        </a>
+                    </div>
+                </div>
+            <?php } ?>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div id="page-details" class="page-content">
+    <section class="details-section">
+        <div class="container">
+            <div class="section-title-wrapper">
+                <h2 class="section-title">Auction <span>Details</span></h2>
+            </div>
+            
+            <div class="details-wrapper">
+                <div class="row g-5">
+                    <div class="col-md-6 details-img-container">
+                        <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30" alt="Product Image">
+                    </div>
+                    <div class="col-md-6">
+                        <div class="details-info-container">
+                            <h2 id="detail-title">Premium Asset</h2>
+                            <div class="meta-info">
+                                <span class="meta-badge"><i class="bi bi-shield-check"></i> Verified Asset</span>
+                                <span class="meta-badge"><i class="bi bi-clock"></i> Active Session</span>
+                            </div>
+                            <p id="detail-desc" class="text-muted lh-lg mb-4"></p>
+                            
+                            <div class="price-container mb-4">
+                                <span class="price-label">Current Standing Bid</span>
+                                <div class="price" id="detail-price">৳ 0.00</div>
+                            </div>
+
+                            <a onclick="switchPage('buyer/auctions.php')" class="btn-refresh bg-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to Live Feed
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div id="page-mybids" class="page-content">
+    <section class="mybids-section">
+        <div class="container">
+            <div class="section-title-wrapper">
+                <h2 class="section-title">My Bidding <span>History</span></h2>
+            </div>
+            <div class="bids-placeholder">
+                <i class="bi bi-gavel"></i>
+                <h4>No Bids Placed Yet</h4>
+                <p class="mb-0">Your active bids history and auction winning listings will be cataloged inside here.</p>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div id="page-watchlist" class="page-content">
+    <section class="watchlist-section">
+        <div class="container">
+            <div class="section-title-wrapper">
+                <h2 class="section-title">My Premium <span>Watchlist</span></h2>
+            </div>
+            <div class="watchlist-placeholder">
+                <i class="bi bi-heart-fill"></i>
+                <h4>Your Watchlist is Empty</h4>
+                <p class="mb-0">Items you watch will appear here once you add them from live auctions.</p>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div class="footer">
+    © 2026 Online Auction System | Designed with Excellence. All Rights Reserved.
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function switchPage(filePath) {
+        document.querySelectorAll('.page-content').forEach(page => {
+            page.classList.remove('active-page');
+        });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        
+        let targetId = 'dashboard';
+        let navId = 'dashboard';
+
+        if(filePath === 'buyer/dashboard.php') { targetId = 'dashboard'; navId = 'dashboard'; }
+        else if(filePath === 'buyer/auctions.php') { targetId = 'auctions'; navId = 'auctions'; }
+        else if(filePath === 'buyer/auction_details.php') { targetId = 'details'; navId = 'auctions'; }
+        else if(filePath === 'buyer/my_bids.php') { targetId = 'mybids'; navId = 'mybids'; }
+        else if(filePath === 'buyer/watchlist.php') { targetId = 'watchlist'; navId = 'watchlist'; }
+
+        document.getElementById('page-' + targetId).classList.add('active-page');
+        let activeNavLink = document.getElementById('nav-' + navId);
+        if(activeNavLink) activeNavLink.classList.add('active');
+        
+        window.scrollTo(0, 0);
+        
+        const menuToggle = document.getElementById('menu');
+        const bsCollapse = bootstrap.Collapse.getInstance(menuToggle);
+        if (bsCollapse) {
+            bsCollapse.hide();
+        }
+    }
+
+    function viewProductDetails(title, description, price) {
+        document.getElementById('detail-title').innerText = title;
+        document.getElementById('detail-desc').innerText = description;
+        document.getElementById('detail-price').innerText = '৳ ' + price;
+        switchPage('buyer/auction_details.php');
+    }
+</script>
+
+</body>
+</html>
